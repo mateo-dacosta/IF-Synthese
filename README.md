@@ -22,3 +22,8 @@ Chaque rapport correspond à un travail individuel de synthèse (1 heure) réali
 | **Django** | Python | *(À venir)* |
 
 ---
+
+## Rapport général
+
+- 📄 [Consulter le rapport général comparatif (brouillon)](rapport_general.md)
+

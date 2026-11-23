@@ -2,14 +2,18 @@
 
 **Auteur :** Matéo Da Costa
 
-## 1. Introduction & Problématique
+## 1. Frameworks étudiés
 
-Dans le cadre du module **Infrastructures & Frameworks**, nous explorons cinq technologies backend emblématiques représentant des philosophies de conception, des langages et des moteurs d'exécution très différents :
-- **Ruby on Rails** (Ruby) : le pionnier du *Convention over Configuration* et du monolithe MVC.
-- **NestJS** (TypeScript / Node.js) : l'architecture d'entreprise modulaire et typée sur boucle d'événements.
-- **Phoenix** (Elixir / BEAM) : la concurrence massive et la tolérance aux pannes du modèle d'acteurs. *(À venir)*
-- **Gin** (Go) : le minimalisme compilé, la performance brute et l'empreinte mémoire minimale. *(À venir)*
-- **Django** (Python) : le framework *batteries-included* pragmatique et adossé à l'écosystème data/IA. *(À venir)*
+
+Dans le cadre de l'UE **Infrastructures & Frameworks**, nous avons exploré 5 frameworks web différents :
+
+| Framework | Langage / Écosystème |
+| :--- | :--- |
+| **Ruby on Rails (RoR)** | Ruby |
+| **NestJS** | TypeScript / Node.js |
+| **Phoenix** | Elixir |
+| **Gin** | Go |
+| **Django** | Python |
 
 **Problématique :** Il n'existe pas un framework meilleur qu'un autre, donc comment les choix de conception déterminent-ils le compromis entre productivité, DevEx, maintenabilité et performance ?
 
@@ -18,24 +22,24 @@ Dans le cadre du module **Infrastructures & Frameworks**, nous explorons cinq te
 Pour évaluer chaque framework voici leur philosophie en quelques mots :
 
 - **Ruby on Rails** (Ruby) : 
-  - *Philosophie :* « Convention over Configuration » et « Developer Happiness ». 
-  - *En résumé :* Tout est pensé pour prototyper et livrer très vite grâce à des conventions implicites et un monolithe MVC tout-en-un qui évite d'écrire du code d'infrastructure.
+  - *Philosophie :* Simplicité et productivité.
+  - *En résumé :* Tout est pensé pour prototyper et livrer très vite grâce à des conventions et un monolithe MVC.
 
 - **NestJS** (TypeScript / Node.js) : 
-  - *Philosophie :* Rigueur d'entreprise, modularité et typage strict (inspiré de Spring Boot). 
-  - *En résumé :* Aucune magie, architecture explicite découpée en Modules, Contrôleurs et Services avec injection de dépendances. Conçu pour des APIs structurées et maintenables en équipe sur un moteur asynchrone non-bloquant.
+  - *Philosophie :* Architecture modulaire et extensible, couplage faible grâce à l'injection de dépendances et typage strict ( Inspiré par Spring Boot ). 
+  - *En résumé :* Architecture explicite découpée en Modules, Contrôleurs et Services avec injection de dépendances. Conçu pour des APIs structurées et maintenables en équipe.
 
 - **Phoenix** (Elixir) : 
-  - *Philosophie :* Concurrence massive et tolérance aux pannes (modèle d'acteurs sur la machine virtuelle BEAM / Erlang). 
-  - *En résumé :* Permet d'encaisser des millions de connexions simultanées en temps réel (WebSockets, LiveView) avec une isolation totale des processus (un crash n'impacte jamais le reste du système).
+  - *Philosophie :* Performance et robustesse.
+  - *En résumé :* Gère efficacement des millions de connexions simultanées avec une isolation totale des processus.
 
 - **Gin** (Go) : 
-  - *Philosophie :* Minimalisme, simplicité et performance brute. 
-  - *En résumé :* Un micro-framework HTTP réduit à l'essentiel, compilé en binaire natif. Empreinte mémoire minimale, temps de réponse quasi-instantanés et concurrence légère grâce aux goroutines.
+  - *Philosophie :*
+  - *En résumé :*
 
 - **Django** (Python) : 
-  - *Philosophie :* « Batteries-included » et pragmatisme. 
-  - *En résumé :* Fournit clé en main tous les outils nécessaires au web (ORM puissant, back-office d'administration automatique, authentification, sécurité), avec une passerelle directe vers l'écosystème data et IA de Python.
+  - *Philosophie :*
+  - *En résumé :*
 
 
 ## 3. Comparaison des conceptes
