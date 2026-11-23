@@ -2,63 +2,60 @@
 
 ## 1. Ce qu'on a fait pendant le TP
 
-L'objectif de la séance était d'ajouter la gestion des dépenses dans l'API Splitly (les bons comptes) en utilisant NestJS.
+L'objectif de la séance était de compléter le backend de l'application Splitly (Les Bons Comptes) en développant le module des dépenses avec NestJS.
 
-En partant d'une base avec l'authentification JWT, les utilisateurs et les porte-monnaies, on a réalisé 4 étapes :
-- La mise en place de la route `GET /wallets/:walletId/expenses` avec le calcul de la somme totale en base et le formatage des données.
-- La création de la route `POST /wallets/:walletId/expenses` avec un DTO validé via `class-validator`, la gestion d'un payeur alternatif membre et le rafraîchissement de la date de modification du porte-monnaie.
-- La sécurisation de la suppression `DELETE /wallets/:walletId/expenses/:id` (réponse 204) avec un Guard personnalisé (`ExpenseOwnerGuard`), un décorateur de paramètre `@CurrentUser()` et la vérification que le porte-monnaie n'est pas clôturé.
-- En bonus, le calcul de clôture et d'équilibre des comptes (`GET /wallets/:id/balance`) via une fonction pure pour répartir équitablement les centimes restants et générer la liste des virements d'équilibrage.
+En partant d'une base avec les utilisateurs, les porte-monnaies et Prisma, on a réalisé 4 missions :
+- La route `GET /wallets/:walletId/expenses` pour lister les dépenses et calculer le total en base.
+- La route `POST /wallets/:walletId/expenses` avec validation stricte par DTO (`class-validator`), payeur optionnel et rafraîchissement de `updatedAt`.
+- La suppression sécurisée `DELETE /wallets/:walletId/expenses/:id` (code 204) via un Guard dédié (`ExpenseOwnerGuard`), un décorateur personnalisé `@CurrentUser()` et le blocage si clôturé.
+- En bonus, le calcul de clôture (`GET /wallets/:id/balance`) avec une fonction pure pour répartir le reste des centimes par ordre d'`userId` et générer les virements.
 
 ## 2. Ce que je retiens de NestJS
 
-NestJS s'appuie sur TypeScript et un moteur d'exécution (Node.js). C'est du JavaScript qui s'exécute sur un environnement mono-thread basé sur une boucle d'événements (*event loop*).
+NestJS apporte la rigueur de Spring Boot à l'écosystème Node.js. Il structure Express avec TypeScript sur un moteur d'exécution JavaScript mono-thread basé sur une boucle d'événements (*event loop*).
 
 ### Les points positifs
-- **Une architecture claire et standardisée** : 
-La séparation nette entre Contrôleur (gestion HTTP), Service (logique métier) et Module (encapsulation et injection de dépendances) évite le code fouillis et structure très bien les projets d'équipe.
-- **La robustesse du typage et de la validation** : 
-Le duo TypeScript + DTO avec `class-validator` et `ValidationPipe` permet de bloquer automatiquement les données mal formées dès l'entrée HTTP avant même d'atteindre le code métier.
-- **Le modèle asynchrone non-bloquant** : 
-Grâce à l'event loop de Node.js et aux `async/await`, NestJS gère très bien un grand nombre de requêtes d'I/O simultanées sans bloquer le thread principal.
+- **Une architecture familière et modulaire** : 
+On retrouve les repères de Spring Boot (Module, Contrôleur, Service, Injection de dépendances), mais organisés par dossier fonctionnel (`src/expenses/`) plutôt que par couche technique.
+- **Le cycle de traitement prévisible** : 
+Le pipeline de requête est clair : Guard (401 - qui es-tu ?) ➔ DTO + ValidationPipe (400 - données valides ?) ➔ Contrôleur (délégation) ➔ Service (403/404/409 - règles métier) ➔ Prisma (SQL). Chaque étape filtre avant la suivante.
+- **Performances sur les I/O** : 
+Le modèle asynchrone non bloquant (`async/await`) de Node.js gère très efficacement les requêtes concurrentes vers la base de données (PostgreSQL/Neon).
 
 ### Les points négatifs
-- **Beaucoup plus verbeux que Rails** : 
-Il y a beaucoup de fichiers et de décorateurs à écrire pour une simple route (DTO, décorateurs, contrôleur, service, déclaration dans le module). C'est moins direct pour prototyper rapidement.
-- **L'injection de dépendances parfois piégeuse** : 
-Si on oublie de lister un service dans les `providers` du module, l'application plante au runtime au démarrage avec une erreur parfois obscure.
-- **Le piège du mono-thread** : 
-Comme Node.js est mono-thread, si on effectue un traitement synchrone lourd (CPU-bound) dans un service au lieu d'opérations asynchrones, on risque de bloquer toute l'event loop et d'impacter toutes les autres requêtes utilisateurs.
+- **Lourdeur du boilerplate** : 
+C'est beaucoup plus verbeux que Ruby on Rails. Il faut écrire un DTO, des décorateurs, une classe de service, un contrôleur et déclarer le tout dans le module pour chaque ressource.
+- **L'injection de dépendances manuelle** : 
+L'oubli d'un service dans le tableau `providers` fait planter l'application au démarrage avec une erreur parfois trompeuse.
+- **Pièges du mono-thread et des flottants** : 
+Comme l'event loop est mono-thread, un calcul lourd synchrone bloque tout le serveur. De plus, JS impose de manipuler les montants en centimes entiers pour éviter les pertes de précision.
 
 ## 3. Les difficultés et blocages rencontrés
 
 Pendant le TP, j'ai rencontré quelques blocages :
 
 - **L'oubli du provider dans le module** :  
-   Après avoir créé `ExpensesController` et `ExpensesService`, l'application a planté avec l'erreur `Nest can't resolve dependencies of the ExpensesController (?)`. J'avais oublié d'ajouter `ExpensesService` dans le tableau `providers` de `ExpensesModule`.
+   Après avoir codé `ExpensesController` et `ExpensesService`, NestJS a levé `Nest can't resolve dependencies of the ExpensesController (?)`. J'avais oublié d'ajouter le service dans `providers` de `ExpensesModule`.
 
-- **Les contraintes sur le DTO de dépense** :  
-   Au départ, j'avais utilisé `@IsPositive()` pour le montant, mais le test a refusé `12.5` car les montants doivent être des entiers stricts en centimes. J'ai dû combiner `@IsInt()` et `@Min(1)`. De plus, j'avais oublié `@IsOptional()` sur `paidById`, ce qui rejetait les requêtes valides où l'utilisateur connecté est le payeur par défaut.
+- **La validation stricte du DTO** :  
+   J'avais initialement utilisé `@IsPositive()` pour le montant, mais le test a refusé `12.5` car un montant en centimes doit être un entier strict (`@IsInt()` + `@Min(1)`). J'ai aussi dû ajouter `@IsOptional()` sur `paidById` pour autoriser l'absence de payeur explicite.
 
-- **Le code HTTP 204 sur la suppression** :  
-   Par défaut, une route `@Delete()` renvoie un code `200 OK` dans NestJS si on renvoie du contenu ou du void sans précision. Le test attendait un `204 No Content`, ce qui a nécessité l'ajout de `@HttpCode(HttpStatus.NO_CONTENT)`.
+- **Le code HTTP 204 sur le DELETE** :  
+   NestJS renvoie `200 OK` par défaut sur une route DELETE. Pour valider le test, il a fallu ajouter explicitement `@HttpCode(HttpStatus.NO_CONTENT)`.
 
-- **L'extension `.js` obligatoire en ESM** :  
-   Dans un projet Node en mode ES Modules (`"type": "module"`), chaque import local doit impérativement se terminer par `.js` même si les sources sont en `.ts` (ex: `import ... from './expenses.service.js'`), ce que l'auto-complétion de VS Code n'ajoute pas toujours par défaut.
+- **Les contraintes d'import ESM** :  
+   En mode ECMAScript Modules (`"type": "module"`), chaque import de fichier local doit comporter son extension `.js` (ex: `expenses.service.js`), ce qui n'est pas automatique dans VS Code.
 
 ## 4. Mon avis sur l'utilisation de l'IA (IA générative)
 
-Contrairement à Ruby on Rails où l'IA compense surtout le manque d'expérience avec les conventions magiques, avec NestJS l'IA apporte un bénéfice différent :
-- **Idéal pour absorber la verbosité (boilerplate)** : 
-Comme NestJS demande beaucoup de code d'infrastructure (décorateurs Swagger, DTOs, classes de modules, tests unitaires avec mocks), l'IA excelle pour générer rapidement tout ce squelette répétitif.
-
-- **Moins d'hallucinations grâce au typage explicite** : 
-NestJS étant très explicite avec TypeScript, l'IA dispose de contrats clairs (types Prisma, interfaces, DTOs). Le compilateur TypeScript et le `ValidationPipe` détectent immédiatement si l'IA invente une méthode ou une propriété inexistante.
-
-- **Un bon tuteur pour l'architecture** : 
-L'IA est très utile pour expliquer comment brancher les Guards, les Interceptors ou les Pipes dans le cycle de vie de NestJS, qui sont des notions plus abstraites que le MVC classique.
+Pour NestJS, l'apport de l'IA est très complémentaire à celui observé sur Ruby on Rails :
+- **Absorption du boilerplate** : 
+L'IA est particulièrement efficace pour générer le code répétitif indispensable à NestJS (décorateurs Swagger, classes DTO, mocks de tests unitaires avec Vitest).
+- **Moins d'hallucinations grâce au typage fort** : 
+Contrairement à Rails où les conventions implicites peuvent tromper les modèles, NestJS repose sur des contrats explicites (types Prisma, interfaces, DTO). Le compilateur TypeScript et le `ValidationPipe` détectent immédiatement les erreurs de l'IA.
+- **Assistance à l'architecture** : 
+L'IA aide à choisir le bon outil au bon endroit (quand utiliser un Guard vs un Middleware vs un Pipe) et à respecter la séparation stricte des responsabilités.
 
 ## 5. Conclusion
 
-NestJS offre un cadre d'entreprise robuste et moderne pour construire des APIs avec Node.js. C'est plus verbeux et moins axé sur la productivité immédiate que Ruby on Rails, mais en contrepartie, le typage strict, la modularité et l'inversion de contrôle rendent les projets beaucoup plus faciles à maintenir et à faire évoluer à grande échelle.
-
+NestJS est moins orienté sur la productivité instantanée que Ruby on Rails, mais il offre un cadre d'entreprise robuste, prévisible et maintenable pour les APIs d'envergure. En associant la puissance de TypeScript et le modèle asynchrone de Node.js, il constitue un standard solide pour des architectures modernes en conteneurs (Cloud Run).
