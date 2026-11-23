@@ -2,7 +2,7 @@
 
 ## 1. Ce qu'on a fait pendant le TP
 
-L'objectif de la séance était de compléter le backend de l'application Splitly (Les Bons Comptes) en développant le module des dépenses avec NestJS.
+L'objectif de la séance était de compléter le backend de l'application Les Bons Comptes en développant le module des dépenses avec NestJS.
 
 En partant d'une base avec les utilisateurs, les porte-monnaies et Prisma, on a réalisé 4 missions :
 - La route `GET /wallets/:walletId/expenses` pour lister les dépenses et calculer le total en base.
