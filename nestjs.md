@@ -35,20 +35,21 @@ Comme Node.js est mono-thread, si on effectue un traitement synchrone lourd (CPU
 Pendant le TP, j'ai rencontré quelques blocages :
 
 - **L'oubli du provider dans le module** :  
-   Après avoir créé `ExpensesController` et `ExpensesService`, l'application a planté avec l'erreur `Nest can't resolve dependencies of the ExpensesController (?)`. J'avais oublié d'ajouter `ExpensesService` dans le tableau `providers` de `ExpensesModule`.
+   J'avais oublié d'ajouter `ExpensesService` dans le tableau `providers` de `ExpensesModule`.
 
-- **Les contraintes sur le DTO de dépense** :  
-   Au départ, j'avais utilisé `@IsPositive()` pour le montant, mais le test a refusé `12.5` car les montants doivent être des entiers stricts en centimes. J'ai dû combiner `@IsInt()` et `@Min(1)`. De plus, j'avais oublié `@IsOptional()` sur `paidById`, ce qui rejetait les requêtes valides où l'utilisateur connecté est le payeur par défaut.
+- **Les contraintes sur le DTO** :  
+   J'avais utilisé `@IsPositive()` pour le montant, mais les tests ne sont pas passé. J'ai dû combiner `@IsInt()` et `@Min(1)`.
 
 - **Le code HTTP 204 sur la suppression** :  
-   Par défaut, une route `@Delete()` renvoie un code `200 OK` dans NestJS si on renvoie du contenu ou du void sans précision. Le test attendait un `204 No Content`, ce qui a nécessité l'ajout de `@HttpCode(HttpStatus.NO_CONTENT)`.
+   La route `@Delete()` renvoyait un code `200 OK`, alors que le test attendait un `204 No Content`. J'ai dû ajouter `@HttpCode(HttpStatus.NO_CONTENT)`.
 
-- **L'extension `.js` obligatoire en ESM** :  
-   Dans un projet Node en mode ES Modules (`"type": "module"`), chaque import local doit impérativement se terminer par `.js` même si les sources sont en `.ts` (ex: `import ... from './expenses.service.js'`), ce que l'auto-complétion de VS Code n'ajoute pas toujours par défaut.
+- **L'extension `.js`** :  
+   Dans un projet Node en mode ES Modules, chaque import local doit impérativement se terminer par `.js` ce que l'auto-complétion n'avait pas ajouté par défault.
 
 ## 4. Mon avis sur l'utilisation de l'IA (IA générative)
 
-Contrairement à Ruby on Rails où l'IA compense surtout le manque d'expérience avec les conventions magiques, avec NestJS l'IA apporte un bénéfice différent :
+Avec NestJS, l'IA apporte un bénéfice différent :
+
 - **Idéal pour absorber la verbosité (boilerplate)** : 
 Comme NestJS demande beaucoup de code d'infrastructure (décorateurs Swagger, DTOs, classes de modules, tests unitaires avec mocks), l'IA excelle pour générer rapidement tout ce squelette répétitif.
 
@@ -57,6 +58,9 @@ NestJS étant très explicite avec TypeScript, l'IA dispose de contrats clairs (
 
 - **Un bon tuteur pour l'architecture** : 
 L'IA est très utile pour expliquer comment brancher les Guards, les Interceptors ou les Pipes dans le cycle de vie de NestJS, qui sont des notions plus abstraites que le MVC classique.
+
+- **L'illusion de sécurité du typage** : 
+Comme TypeScript s'efface à la compilation, l'IA produit facilement du code qui compile sans erreur mais dont les décorateurs `class-validator` sont incomplets ou mal calibrés, créant des failles à l'exécution si on se fie aveuglément aux types.
 
 ## 5. Conclusion
 
